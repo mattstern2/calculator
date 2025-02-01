@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>pKa–pH Calculator for Dental Safety</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      label { display: inline-block; width: 100px; margin-top: 8px; }
+      input { margin: 5px; }
+      button { margin-top: 10px; }
+      .note { font-size: 0.9em; color: #555; }
+    </style>
+  </head>
+  <body>
+    <h1>pKa–pH Calculator for Dental Safety</h1>
+    <p>
+      This tool calculates the fraction of acid that is undissociated at your product’s pH
+      (using the Henderson–Hasselbalch equation). Because only the undissociated form (HA)
+      is thought to lower plaque pH and harm enamel, you can use the result to estimate a
+      maximum total acid concentration for your formulation.
+    </p>
+    <p>
+      (In this example a safe undissociated acid threshold is assumed to be 0.01 M. Adjust
+      this value based on your specific safety criteria.)
+    </p>
+    
+    <div>
+      <label for="pKa">Acid pKa:</label>
+      <input type="number" id="pKa" step="any" placeholder="e.g., 3.2"><br>
+      <label for="pH">Product pH:</label>
+      <input type="number" id="pH" step="any" placeholder="e.g., 5.5"><br>
+      <button onclick="calculate()">Calculate</button>
+    </div>
+    
+    <h2>Results:</h2>
+    <div id="results"></div>
+    
+    <script>
+      function calculate() {
+        // Get inputs and convert to numbers
+        var pKa = parseFloat(document.getElementById('pKa').value);
+        var pH = parseFloat(document.getElementById('pH').value);
+        
+        if(isNaN(pKa) || isNaN(pH)) {
+          document.getElementById('results').innerHTML = "<p>Please enter valid numbers for both pKa and pH.</p>";
+          return;
+        }
+        
+        // Calculate the ratio [A⁻]/[HA] = 10^(pH – pKa)
+        var ratio = Math.pow(10, pH - pKa);
+        // Fraction undissociated (HA)
+        var fracHA = 1 / (1 + ratio);
+        // Fraction dissociated (A⁻)
+        var fracA = ratio / (1 + ratio);
+        
+        // Convert to percentages for display
+        var percentHA = (fracHA * 100).toFixed(2);
+        var percentA  = (fracA * 100).toFixed(2);
+        
+        // Assume a safe threshold for undissociated acid (in M)
+        var safeThreshold = 0.01; // Adjust as needed
+        // Calculate the maximum total acid concentration allowed
+        var maxAcidConcentration = safeThreshold / fracHA;
+        
+        var resultText = "<p>At pH " + pH.toFixed(2) + " for an acid with pKa " + pKa.toFixed(2) + ":</p>";
+        resultText += "<ul>";
+        resultText += "<li>Fraction undissociated (HA): " + percentHA + "%</li>";
+        resultText += "<li>Fraction dissociated (A⁻): " + percentA + "%</li>";
+        resultText += "</ul>";
+        resultText += "<p>Assuming that only the undissociated acid contributes to enamel erosion,";
+        resultText += " and using a safe threshold of " + safeThreshold + " M for HA, the maximum ";
+        resultText += "total acid concentration that can be used is approximately ";
+        resultText += maxAcidConcentration.toFixed(4) + " M.</p>";
+        resultText += "<p class='note'>Note: This is a simplified, rough estimate. Actual safety depends on factors such as product dilution in saliva, plaque buffering capacity, exposure time, and other formulation details.</p>";
+        
+        document.getElementById('results').innerHTML = resultText;
+      }
+    </script>
+  </body>
+</html>
